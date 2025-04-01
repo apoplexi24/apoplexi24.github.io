@@ -8,7 +8,7 @@ pin: false
 math: true
 mermaid: false
 image:
-  path: sqlite-is-fine-for-storing-user-settings-and-also-v0-nlrc9vykesya1.webp
+  path: https://cdn.jsdelivr.net/gh/apoplexi24/blog-assets@main/sqlite-cache/img/sqlite-fragmentation-2.jpg
   alt: SQLite meme showing its limitations
 ---
 
@@ -16,7 +16,7 @@ Cache is every backend developer's wet dream. Having your variables loaded onto 
 
 Spoiler alert: it wasn't *all* sunshine and rainbows. In fact, it was more like a partly cloudy day with a high chance of existential dread and a few "why did I do this to myself?" contemplation. This note chronicles my journey into the heart of caching darkness, armed with nothing but good intentions, questionable assumptions, and a database engine that's probably still judging me.
 
-![SQLite Meme](../assets/img/blog_assets/sqlite-is-fine-for-storing-user-settings-and-also-v0-nlrc9vykesya1.webp)
+<img src="https://cdn.jsdelivr.net/gh/apoplexi24/blog-assets@main/sqlite-cache/img/sqlite-gaussianbell.webp" alt="SQLite Meme" />
 _When SQLite seems like the perfect solution... at first_
 
 ## The Beginning of the End
@@ -104,7 +104,7 @@ async def upload_large_file(file_id: str = Form(...),
 
 Wrong. I forgot the very fact that the backend is managed by Gunicorn. 
 
-![Error Message](../assets/img/blog_assets/error2black.png)
+<img src="https://cdn.jsdelivr.net/gh/apoplexi24/blog-assets@main/sqlite-cache/img/error2black.png" alt="Error Message" />
 _The moment of realization_
 
 > Gunicorn 'Green Unicorn' is a Python WSGI HTTP Server for UNIX. It's a pre-fork worker model. The Gunicorn server is broadly compatible with various web frameworks, simply implemented, light on server resources, and fairly speedy.
@@ -112,21 +112,18 @@ _The moment of realization_
 
 Gunicorn spun up the default count of 25 (ie 2 * $num_cores+1$) uvicorn workers to do its bidding. That means each request is getting routed to one of those 25 uvicorn workers based on request traffic, while they all have their own version of the global variable loaded. The file I was uploading was getting updated only in the uvicorn worker to which the request was routed and not propagated to the other workers.
 
-![Gunicorn Workers](../assets/img/blog_assets/Untitled-2024-11-07-1244.png)
+<img src="https://cdn.jsdelivr.net/gh/apoplexi24/blog-assets@main/sqlite-cache/img/gunicorn-flowchart.png" alt="Gunicorn Workers" />
 _Multiple workers, multiple problems_
 
 ## SQLite - A Batman or Bane?
 
 SQLite prides itself on being faster than a filesystem by a factor of 35%[^2], which means it **should** be blazing fast. But wait, what about the space-time trade-off in data storage (or any algorithm in the world). We saved some time so there must be a space tradeoff somewhere which we cannot afford, the runtime by itself is consuming RAM like there is no tomorrow.
 
-![Patrick SQLite](../assets/img/blog_assets/patrick_sqlite.jpg)
-_When SQLite seems like the answer to everything_
-
 ## Major Issues with using SQLite as Cache
 
 A good SQLite database architecture makes use of indices for speed in querying. If the filter is applied on a particular column that is not indexed, the entire table is loaded onto the memory rather than using an offset[^3]. This means anytime the filter is not on the columns I intend the users to query on, then the ETA converts from "3 minutes" to "1000 hours" like I am downloading a badly seeded file using P2P torrent.
 
-![Download Time](../assets/img/blog_assets/57698689.jpg)
+<img src="https://cdn.jsdelivr.net/gh/apoplexi24/blog-assets@main/sqlite-cache/img/sqlite-fragmentation.jpg" alt="Download Time" />
 _Actual footage of what goes on in data science teams_
 
 Let's delve into the real reasons why SQLite as a cache turned my coding utopia into a debugging dystopia:
@@ -148,7 +145,8 @@ Let's delve into the real reasons why SQLite as a cache turned my coding utopia 
 
 Even though the process was harrowing, I managed to make it work. 
 
-![Abomination](../assets/img/blog_assets/abomination.png)
+<img src="https://cdn.jsdelivr.net/gh/apoplexi24/blog-assets@main/sqlite-cache/img/prod-abomination.png" alt="Prod Abomination" />
+
 _Abomination of a code if I must_
 
 > Ugly Working Software >>> Fancy Software that doesn't work
