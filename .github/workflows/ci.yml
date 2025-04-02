@@ -46,9 +46,6 @@ jobs:
         with:
           node-version: lts/*
 
-      - name: Configure npm registry
-        run: npm config set registry https://registry.npmjs.org/
-
       - name: Build Assets
         run: npm i && npm run build
 
